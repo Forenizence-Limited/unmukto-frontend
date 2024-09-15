@@ -6,17 +6,23 @@ import { useGetPostQuery } from '@/libs/redux-store/apiSlice/postApi';
 import { convertMsToDate } from '@/utils/utils';
 import { Building2, Calendar, MapPin, Navigation } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 // Client Component
 
 export default function PostPage({ params }: { params: { postId: string; }; }) {
   const { postId } = params;
+  const router = useRouter();
 
   // Fetch the post data using RTK Query
-  const { data: post, error, isLoading } = useGetPostQuery(postId);
+  const { data: post, isError, error, isLoading } = useGetPostQuery(postId);
 
   if (isLoading) return <Loader />;
-  if (error) return <p>Error loading post.</p>;
+  if (isError) {
+    if (error != null && 'status' in error && error.status === 401) {
+      router.push('/login');
+    }
+  }
   if (!post) return <p>No post found.</p>;
 
   return (
